@@ -5,7 +5,11 @@ const main = async () => {
   ['Acid Burn', 'Zero Cool', 'Crash Override'],
   ['https://www.daopunks.io/static/media/1.12a20d45.jpg', 'https://www.daopunks.io/static/media/2.3f403f82.jpg', 'https://www.daopunks.io/static/media/3.ced9f136.jpg'],
   [100, 200, 300],
-  [100, 50, 25]
+  [100, 50, 25],
+  "Bank-thulu",
+  "https://thumbs.dreamstime.com/b/evil-bank-illustration-48790809.jpg",
+  10000,
+  50
   );
   await gameContract.deployed();
   console.log("Contract deployed to: ", gameContract.address);
@@ -13,21 +17,13 @@ const main = async () => {
   txn = await gameContract.mintCharacterNFT(0);
   await txn.wait();
   console.log("Minted NFT #1");
-
-  txn = await gameContract.mintCharacterNFT(1);
-  await txn.wait();
-  console.log("Minted NFT #2");
-
-  txn = await gameContract.mintCharacterNFT(2);
-  await txn.wait();
-  console.log("Minted NFT #3");
-
-  txn = await gameContract.mintCharacterNFT(0);
-  await txn.wait();
-  console.log("Minted NFT #4");
-
   console.log("Done deploying and minting!");
-
+  txn = await gameContract.attackBoss();
+  await txn.wait();
+  console.log("Attacked boss!");
+  txn = await gameContract.attackBoss();
+  await txn.wait();
+  console.log("Attacked boss!");
 }
 
 const runMain = async () => {

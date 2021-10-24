@@ -21,6 +21,15 @@ contract MyEpicGame is ERC721 {
         uint256 level;
     }
 
+    struct BigBoss {
+        string name;
+        string imageURI;
+        uint256 hp;
+        uint256 maxHp;
+        uint256 attackDamage;
+    }
+    BigBoss public bigBoss;
+
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -34,8 +43,26 @@ contract MyEpicGame is ERC721 {
         string[] memory _characterNames,
         string[] memory _characterImageURIs,
         uint256[] memory _characterHP,
-        uint256[] memory _characterAttackDmg
+        uint256[] memory _characterAttackDmg,
+        string memory _bossName,
+        string memory _bossImageURI,
+        uint256 _bossHP,
+        uint256 _bossAttackDmg
     ) ERC721("DAO Punkz", "PUNKZ") {
+        bigBoss = BigBoss({
+            name: _bossName,
+            imageURI: _bossImageURI,
+            hp: _bossHP,
+            maxHp: _bossHP,
+            attackDamage: _bossAttackDmg
+        });
+        console.log(
+            "Done initializing boss %s w/ HP %s, img %s",
+            bigBoss.name,
+            bigBoss.hp,
+            bigBoss.imageURI
+        );
+
         for (uint256 i = 0; i < _characterNames.length; i += 1) {
             defautCharacters.push(
                 CharacterAttributes({
@@ -128,5 +155,47 @@ contract MyEpicGame is ERC721 {
             abi.encodePacked("data:application/json;base64,", json)
         );
         return output;
+    }
+
+    function attackBoss() public {
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributs[
+            nftTokenIdOfPlayer
+        ];
+        console.log(
+            "\nPlayer w/ character %s about to attack. Has %s HP and %s AD",
+            player.name,
+            player.hp,
+            player.attackDamage
+        );
+        console.log(
+            "Boss %s has %s HP and %s AD",
+            bigBoss.name,
+            bigBoss.hp,
+            bigBoss.attackDamage
+        );
+        require(player.hp > 0, "Error: character must have HP to attack boss");
+        require(bigBoss.hp > 0, "Error: boss must have HP to attack character");
+        if (bigBoss.hp < player.attackDamage) {
+            console.log("Boss is dead");
+            bigBoss.hp = 0;
+            return;
+        } else {
+            bigBoss.hp -= player.attackDamage;
+            console.log("Boss has %s HP left", bigBoss.hp);
+        }
+        if (player.hp < bigBoss.attackDamage) {
+            console.log("Player is dead");
+            player.hp = 0;
+            return;
+        } else {
+            player.hp -= bigBoss.attackDamage;
+            console.log("Player has %s HP left", player.hp);
+        }
+        if (player.hp == 0) {
+            player
+                .imageURI = "http://cliparts.co/cliparts/rTj/KGa/rTjKGajec.gif";
+            return;
+        }
     }
 }
