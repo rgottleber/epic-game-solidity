@@ -8,22 +8,11 @@ const main = async () => {
   [100, 50, 25],
   "Bank-thulu",
   "https://thumbs.dreamstime.com/b/evil-bank-illustration-48790809.jpg",
-  10000,
+  666,
   50
   );
   await gameContract.deployed();
   console.log("Contract deployed to: ", gameContract.address);
-  let txn;
-  txn = await gameContract.mintCharacterNFT(0);
-  await txn.wait();
-  console.log("Minted NFT #1");
-  console.log("Done deploying and minting!");
-  txn = await gameContract.attackBoss();
-  await txn.wait();
-  console.log("Attacked boss!");
-  txn = await gameContract.attackBoss();
-  await txn.wait();
-  console.log("Attacked boss!");
 }
 
 const runMain = async () => {

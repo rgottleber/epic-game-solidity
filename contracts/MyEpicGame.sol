@@ -18,7 +18,6 @@ contract MyEpicGame is ERC721 {
         uint256 hp;
         uint256 maxHp;
         uint256 attackDamage;
-        uint256 level;
     }
 
     struct BigBoss {
@@ -35,7 +34,7 @@ contract MyEpicGame is ERC721 {
 
     CharacterAttributes[] defautCharacters;
 
-    mapping(uint256 => CharacterAttributes) public nftHolderAttributs;
+    mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
     mapping(address => uint256) public nftHolders;
 
     event CharacterNFTMinted(
@@ -77,8 +76,7 @@ contract MyEpicGame is ERC721 {
                     imageURI: _characterImageURIs[i],
                     hp: _characterHP[i],
                     maxHp: _characterHP[i],
-                    attackDamage: _characterAttackDmg[i],
-                    level: 1
+                    attackDamage: _characterAttackDmg[i]
                 })
             );
             CharacterAttributes memory c = defautCharacters[i];
@@ -97,14 +95,13 @@ contract MyEpicGame is ERC721 {
 
         _safeMint(msg.sender, newItemId);
 
-        nftHolderAttributs[newItemId] = CharacterAttributes({
+        nftHolderAttributes[newItemId] = CharacterAttributes({
             characterIndex: _characterIndex,
             name: defautCharacters[_characterIndex].name,
             imageURI: defautCharacters[_characterIndex].imageURI,
             hp: defautCharacters[_characterIndex].hp,
             maxHp: defautCharacters[_characterIndex].hp,
-            attackDamage: defautCharacters[_characterIndex].attackDamage,
-            level: defautCharacters[_characterIndex].level
+            attackDamage: defautCharacters[_characterIndex].attackDamage
         });
 
         console.log(
@@ -124,7 +121,7 @@ contract MyEpicGame is ERC721 {
         override
         returns (string memory)
     {
-        CharacterAttributes memory charAttributes = nftHolderAttributs[
+        CharacterAttributes memory charAttributes = nftHolderAttributes[
             _tokenId
         ];
         string memory strHp = Strings.toString(charAttributes.hp);
@@ -132,7 +129,6 @@ contract MyEpicGame is ERC721 {
         string memory strAttackDmg = Strings.toString(
             charAttributes.attackDamage
         );
-        string memory strLevel = Strings.toString(charAttributes.level);
 
         string memory json = Base64.encode(
             bytes(
@@ -150,8 +146,6 @@ contract MyEpicGame is ERC721 {
                         strMaxHp,
                         '}, { "trait_type": "Attack Damage", "value": ',
                         strAttackDmg,
-                        '}, { "trait_type": "Level", "value": ',
-                        strLevel,
                         "} ]}"
                     )
                 )
@@ -166,7 +160,7 @@ contract MyEpicGame is ERC721 {
 
     function attackBoss() public {
         uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
-        CharacterAttributes storage player = nftHolderAttributs[
+        CharacterAttributes storage player = nftHolderAttributes[
             nftTokenIdOfPlayer
         ];
         console.log(
@@ -186,6 +180,8 @@ contract MyEpicGame is ERC721 {
         if (bigBoss.hp < player.attackDamage) {
             console.log("Boss is dead");
             bigBoss.hp = 0;
+            bigBoss
+                .imageURI = "http://cliparts.co/cliparts/rTj/KGa/rTjKGajec.gif";
             return;
         } else {
             bigBoss.hp -= player.attackDamage;
@@ -214,7 +210,7 @@ contract MyEpicGame is ERC721 {
     {
         uint256 userNftTokenId = nftHolders[msg.sender];
         if (userNftTokenId > 0) {
-            return nftHolderAttributs[userNftTokenId];
+            return nftHolderAttributes[userNftTokenId];
         } else {
             CharacterAttributes memory emptyStruct;
             return emptyStruct;
@@ -227,6 +223,17 @@ contract MyEpicGame is ERC721 {
         returns (CharacterAttributes[] memory)
     {
         return defautCharacters;
+    }
+
+    function getAllHeros() public view returns (CharacterAttributes[] memory) {
+        uint256 numHeros = _tokenIds.current() - 1;
+        CharacterAttributes[] memory allNFTs = new CharacterAttributes[](
+            numHeros
+        );
+        for (uint256 i = 1; i < _tokenIds.current(); i += 1) {
+            allNFTs[i - 1] = nftHolderAttributes[i];
+        }
+        return allNFTs;
     }
 
     function getBigBoss() public view returns (BigBoss memory) {
